@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
 
 import { AuditProgress } from "@/components/audit-progress";
+import { ExportReportBar } from "@/components/export-report-bar";
 import { InsightsPanel } from "@/components/insights-panel";
 import { MetricsPanel } from "@/components/metrics-panel";
 import { PromptLogDrawer } from "@/components/prompt-log-drawer";
@@ -35,7 +36,7 @@ export function ResultsClient() {
     }
   }, [raw, url, router]);
 
-  const { step, error, metrics, audit, retry } = useAudit(url);
+  const { step, error, scrape, metrics, audit, retry } = useAudit(url);
 
   if (raw === null || url === null) {
     return (
@@ -79,7 +80,7 @@ export function ResultsClient() {
 
         {step === "analyzing" && metrics ? (
           <p className="mb-8 font-mono text-sm text-zinc-500">
-            Metrics above are live; waiting for Gemini…
+            Factual metrics above are final; waiting for Gemini analysis…
           </p>
         ) : null}
 
@@ -87,6 +88,14 @@ export function ResultsClient() {
           <>
             <InsightsPanel insights={audit.insights} />
             <RecommendationsList items={audit.insights.recommendations} />
+            {metrics ? (
+              <ExportReportBar
+                url={url}
+                metrics={metrics}
+                audit={audit}
+                fetchMetadata={scrape?.metadata ?? null}
+              />
+            ) : null}
             <PromptLogDrawer log={audit.promptLog} />
           </>
         ) : null}

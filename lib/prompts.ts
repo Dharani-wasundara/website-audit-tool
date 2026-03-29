@@ -76,6 +76,6 @@ Analyse this page and return a JSON object with exactly this shape:
   ]
 }
 
-Return 3–5 recommendations, ordered by priority (1 = highest).
+Return exactly 3 to 5 recommendations (not fewer, not more), ordered by priority (1 = highest).
 Every summary and reasoning field must cite at least one specific metric value.`;
 }
