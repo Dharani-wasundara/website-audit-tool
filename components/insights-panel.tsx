@@ -100,12 +100,12 @@ export function InsightsPanel({ insights }: { insights: AuditInsights }) {
       <BrandSectionHeading as="h2" className="mb-2">
         AI insights
       </BrandSectionHeading>
-      <div className="-mx-1 rounded-full border border-zinc-200/90 bg-zinc-50/90 p-1 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:pb-1 [&::-webkit-scrollbar]:hidden">
+      <div className="-mx-1 rounded-full border border-zinc-200/90 bg-zinc-50/90 px-1.5 py-1.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div
           ref={trackRef}
           role="tablist"
           aria-label="Insight categories"
-          className="relative flex flex-nowrap gap-1 overflow-x-auto overflow-y-hidden sm:flex-wrap sm:overflow-visible"
+          className="relative flex flex-nowrap items-center gap-1 overflow-x-auto overflow-y-hidden sm:flex-wrap sm:overflow-visible"
         >
           <span
             aria-hidden
@@ -128,7 +128,7 @@ export function InsightsPanel({ insights }: { insights: AuditInsights }) {
               aria-selected={tab === t.id}
               onClick={() => setTab(t.id)}
               className={cn(
-                "relative z-10 shrink-0 rounded-full px-3.5 py-2 text-xs sm:py-1.5",
+                "relative z-10 inline-flex min-h-9 shrink-0 items-center justify-center rounded-full px-3.5 py-0 text-xs leading-none",
                 "transition-colors duration-300 ease-out motion-reduce:duration-75",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
                 tab === t.id
