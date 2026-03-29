@@ -7,8 +7,6 @@ import { Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const STORAGE_KEY = "webaudit:url";
-
 function normalizeUrl(raw: string): string {
   const t = raw.trim();
   if (!t) return "";
@@ -35,8 +33,7 @@ export function UrlInputForm({ className }: { className?: string }) {
         setError("URL must start with http:// or https://");
         return;
       }
-      sessionStorage.setItem(STORAGE_KEY, u.href);
-      router.push("/results");
+      router.push(`/results?url=${encodeURIComponent(u.href)}`);
     } catch {
       setError("That doesn’t look like a valid URL");
     }
@@ -81,5 +78,3 @@ export function UrlInputForm({ className }: { className?: string }) {
     </form>
   );
 }
-
-export { STORAGE_KEY as WEBAUDIT_URL_STORAGE_KEY };
