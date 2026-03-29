@@ -92,7 +92,11 @@ The results page includes a **Prompt log** drawer with:
 - User prompt (metrics JSON + markdown)  
 - Raw model output  
 - Model id, input/output token counts, timestamp  
-- **Download JSON** for submission or redaction of secrets  
+- **Download JSON** (prompt log only) for submission or redaction of secrets  
+
+## Export
+
+After a successful run, the results page offers **Download JSON** and **Download Markdown** for the **full report**: audited URL, optional crawl metadata (title, description, status), factual metrics, AI insights and recommendations, and the complete prompt log. Files are named like `website-audit-example.com-2026-03-29.json` / `.md`. Page HTML and markdown are not included to keep files small.
 
 ## What we would improve with more time
 
