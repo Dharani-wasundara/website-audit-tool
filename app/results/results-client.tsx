@@ -1,36 +1,43 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo } from "react";
 
 import { AuditProgress } from "@/components/audit-progress";
 import { InsightsPanel } from "@/components/insights-panel";
 import { MetricsPanel } from "@/components/metrics-panel";
 import { PromptLogDrawer } from "@/components/prompt-log-drawer";
 import { RecommendationsList } from "@/components/recommendations-list";
-import { WEBAUDIT_URL_STORAGE_KEY } from "@/components/url-input";
 import { Button } from "@/components/ui/button";
 import { useAudit } from "@/hooks/use-audit";
 
+function parseAuditUrl(raw: string | null): string | null {
+  if (!raw || !raw.trim()) return null;
+  try {
+    const u = new URL(decodeURIComponent(raw.trim()));
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+    return u.href;
+  } catch {
+    return null;
+  }
+}
+
 export function ResultsClient() {
   const router = useRouter();
-  const [url, setUrl] = useState<string | null>(null);
-  const { step, error, metrics, audit, retry } = useAudit(url);
+  const searchParams = useSearchParams();
+  const raw = searchParams.get("url");
+  const url = useMemo(() => parseAuditUrl(raw), [raw]);
 
   useEffect(() => {
-    const stored =
-      typeof window !== "undefined"
-        ? sessionStorage.getItem(WEBAUDIT_URL_STORAGE_KEY)
-        : null;
-    if (!stored) {
+    if (raw === null || url === null) {
       router.replace("/");
-      return;
     }
-    setUrl(stored);
-  }, [router]);
+  }, [raw, url, router]);
 
-  if (!url) {
+  const { step, error, metrics, audit, retry } = useAudit(url);
+
+  if (raw === null || url === null) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a] font-mono text-sm text-zinc-500">
         Loading…
