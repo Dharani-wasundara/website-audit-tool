@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Link2 } from "lucide-react";
+import { Globe } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,8 @@ function normalizeUrl(raw: string): string {
   if (/^https?:\/\//i.test(t)) return t;
   return `https://${t}`;
 }
+
+const inputId = "audit-url";
 
 export function UrlInputForm({ className }: { className?: string }) {
   const router = useRouter();
@@ -35,43 +37,58 @@ export function UrlInputForm({ className }: { className?: string }) {
       }
       router.push(`/results?url=${encodeURIComponent(u.href)}`);
     } catch {
-      setError("That doesn’t look like a valid URL");
+      setError("That doesn't look like a valid URL");
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className={cn("w-full max-w-xl", className)}>
+    <form
+      onSubmit={handleSubmit}
+      className={cn(
+        "w-full [&_input:focus]:outline-none [&_input:focus-visible]:outline-none",
+        className
+      )}
+    >
+      <label htmlFor={inputId} className="sr-only">
+        Page URL to audit
+      </label>
       <div
         className={cn(
-          "flex flex-col gap-3 sm:flex-row sm:items-stretch",
-          "rounded-xl border border-white/10 bg-black/40 p-1.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] backdrop-blur-sm",
-          "focus-within:border-[#00d4ff]/40 focus-within:shadow-[0_0_0_1px_rgba(0,212,255,0.2)]"
+          "flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-2 shadow-sm",
+          "transition-[border-color] duration-150",
+          "focus-within:border-primary",
+          "sm:flex-row sm:items-center sm:gap-0 sm:p-1.5 sm:pl-3"
         )}
       >
-        <label className="relative flex min-h-11 flex-1 items-center gap-2 px-3">
-          <Link2
-            className="size-4 shrink-0 text-[#00d4ff]/80"
+        <div className="flex min-h-11 min-w-0 flex-1 items-center gap-2.5 px-1 sm:px-0">
+          <Globe
+            className="size-[18px] shrink-0 text-primary"
             aria-hidden
           />
           <input
+            id={inputId}
             type="text"
             name="url"
+            inputMode="url"
             autoComplete="url"
             placeholder="https://example.com"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            className="w-full bg-transparent text-sm text-zinc-100 placeholder:text-zinc-600 outline-none"
+            className="min-w-0 flex-1 bg-transparent py-2 text-[15px] leading-normal text-zinc-900 placeholder:text-zinc-400 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 sm:py-1.5 [caret-color:var(--primary)]"
           />
-        </label>
+        </div>
         <Button
           type="submit"
-          className="h-11 shrink-0 rounded-lg bg-[#00d4ff] px-6 font-mono text-sm font-semibold text-[#0a0a0a] hover:bg-[#33ddff]"
+          className="h-11 w-full shrink-0 rounded-lg border-0 bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-none hover:bg-[var(--primary-hover)] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:ml-1 sm:h-10 sm:w-auto"
         >
-          Analyse URL
+          Run audit
         </Button>
       </div>
       {error ? (
-        <p className="mt-2 text-center text-sm text-red-400 sm:text-left" role="alert">
+        <p
+          className="mt-2 text-center text-sm text-red-600 sm:text-left"
+          role="alert"
+        >
           {error}
         </p>
       ) : null}

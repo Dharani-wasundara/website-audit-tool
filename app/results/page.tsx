@@ -6,7 +6,7 @@ export default function ResultsPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a] font-mono text-sm text-zinc-500">
+        <div className="flex min-h-screen min-h-[100dvh] items-center justify-center bg-white px-4 text-sm text-zinc-600">
           Loading…
         </div>
       }

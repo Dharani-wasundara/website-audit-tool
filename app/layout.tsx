@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -20,15 +20,21 @@ export const metadata: Metadata = {
     "AI-powered single-page website analysis with deterministic metrics and grounded insights.",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("dark font-sans", geistSans.variable)}>
+    <html lang="en" className={cn("font-sans", geistSans.variable)}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased bg-[#0a0a0a] text-foreground`}
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased bg-white text-zinc-900`}
       >
         {children}
       </body>

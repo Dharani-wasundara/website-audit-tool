@@ -2,8 +2,10 @@
 
 import { useCallback } from "react";
 
+import { BrandSectionHeading } from "@/components/brand-section-heading";
 import { Button } from "@/components/ui/button";
 import type { AuditResponse, FirecrawlMetadata, PageMetrics } from "@/lib/types";
+import { outlineActionButtonClassName } from "@/lib/outline-action-button-class";
 import {
   auditExportToMarkdown,
   buildAuditExportPayload,
@@ -62,16 +64,16 @@ export function ExportReportBar({
   }, [url, metrics, audit, fetchMetadata]);
 
   return (
-    <div className="mb-10 rounded-xl border border-white/10 bg-white/[0.02] p-4">
-      <p className="mb-3 font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+    <div className="mb-10 rounded-2xl border border-zinc-200/90 bg-white p-4 shadow-sm sm:p-5">
+      <BrandSectionHeading as="h2" className="mb-2">
         Export report
-      </p>
+      </BrandSectionHeading>
       <div className="flex flex-wrap gap-2">
         <Button
           type="button"
           variant="outline"
           size="sm"
-          className="border-white/20 text-zinc-200"
+          className={outlineActionButtonClassName}
           onClick={downloadJson}
         >
           Download JSON
@@ -80,7 +82,7 @@ export function ExportReportBar({
           type="button"
           variant="outline"
           size="sm"
-          className="border-white/20 text-zinc-200"
+          className={outlineActionButtonClassName}
           onClick={downloadMd}
         >
           Download Markdown

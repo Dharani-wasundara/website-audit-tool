@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
@@ -40,35 +41,62 @@ export function ResultsClient() {
 
   if (raw === null || url === null) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a] font-mono text-sm text-zinc-500">
+      <div className="flex min-h-screen min-h-[100dvh] items-center justify-center bg-white px-4 text-sm text-zinc-600">
         Loading…
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] px-6 py-12">
+    <div className="px-4 py-6 sm:px-6 sm:py-10 md:py-12">
       <div className="mx-auto max-w-4xl">
-        <Link
-          href="/"
-          className="mb-8 inline-block font-mono text-sm text-[#00d4ff] hover:underline"
-        >
-          ← Back
-        </Link>
-        <h1 className="mb-2 font-mono text-lg text-zinc-100">Results</h1>
-        <p className="mb-6 break-all font-mono text-sm text-zinc-500">
-          {url}
-        </p>
+        <header className="mb-6 space-y-5 sm:mb-8 sm:space-y-6">
+          <div className="flex items-center justify-between gap-3">
+            <div
+              className="inline-flex w-fit items-center rounded-full border border-zinc-200 bg-white px-3 py-2 text-[10px] font-semibold tracking-wide text-primary shadow-sm sm:px-4 sm:text-xs"
+              role="note"
+            >
+              WebAudit
+            </div>
+            <Link
+              href="/"
+              className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-primary hover:text-[var(--primary-hover)]"
+            >
+              <ChevronLeft
+                className="size-4 shrink-0"
+                strokeWidth={2}
+                aria-hidden
+              />
+              Back
+            </Link>
+          </div>
+
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-8">
+            <div className="min-w-0 md:flex-1">
+              <h1 className="text-xl font-semibold tracking-tight text-zinc-900 sm:text-2xl md:text-3xl">
+                Results
+              </h1>
+              <p className="mt-1.5 max-w-md text-sm leading-snug text-zinc-500">
+                Single-page analysis for this URL
+              </p>
+            </div>
+            <div
+              className="w-full min-w-0 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-left text-sm leading-normal text-zinc-800 shadow-sm [word-break:break-word] sm:px-3.5 sm:py-2 md:max-w-[min(100%,20rem)] md:w-auto md:self-start md:text-right lg:max-w-md"
+              title={url}
+            >
+              {url}
+            </div>
+          </div>
+        </header>
 
         <AuditProgress url={url} step={step} />
 
         {error ? (
-          <div className="mb-8 rounded-xl border border-red-500/30 bg-red-500/5 p-4">
-            <p className="text-sm text-red-300">{error}</p>
+          <div className="mb-8 rounded-xl border border-red-200 bg-red-50/80 p-4">
+            <p className="text-sm text-red-800">{error}</p>
             <Button
               type="button"
-              variant="outline"
-              className="mt-3 border-white/20 text-zinc-200"
+              className="mt-3 bg-primary text-primary-foreground hover:bg-[var(--primary-hover)]"
               onClick={retry}
             >
               Retry
@@ -79,8 +107,9 @@ export function ResultsClient() {
         {metrics ? <MetricsPanel metrics={metrics} /> : null}
 
         {step === "analyzing" && metrics ? (
-          <p className="mb-8 font-mono text-sm text-zinc-500">
-            Factual metrics above are final; waiting for Gemini analysis…
+          <p className="mb-8 text-sm text-zinc-600">
+            Factual metrics above are final; waiting for{" "}
+            <span className="font-medium text-primary">Gemini</span> analysis…
           </p>
         ) : null}
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandSectionHeading } from "@/components/brand-section-heading";
 import type { PageMetrics } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -35,20 +36,22 @@ function Card({
   return (
     <div
       className={cn(
-        "rounded-xl border border-white/10 bg-white/[0.02] p-4 transition-colors hover:border-white/15",
-        tone === "good" && "border-emerald-500/20",
-        tone === "warn" && "border-amber-500/25",
-        tone === "bad" && "border-red-500/25"
+        "w-full min-w-0 rounded-xl border border-zinc-200/90 bg-white p-4 shadow-sm",
+        tone === "good" && "border-emerald-200/90 ring-1 ring-emerald-500/10",
+        tone === "warn" && "border-amber-200/90 ring-1 ring-amber-500/10",
+        tone === "bad" && "border-red-200/90 ring-1 ring-red-500/10"
       )}
     >
-      <p className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+      <p className="break-words text-[10px] font-medium uppercase tracking-wider text-zinc-500">
         {label}
       </p>
-      <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-zinc-100">
+      <p className="mt-1 text-lg font-semibold tabular-nums text-zinc-900">
         {value}
       </p>
       {sub ? (
-        <p className="mt-0.5 font-mono text-[11px] text-zinc-600">{sub}</p>
+        <p className="mt-0.5 break-words text-[11px] leading-snug text-zinc-500">
+          {sub}
+        </p>
       ) : null}
     </div>
   );
@@ -68,21 +71,23 @@ function MetaTextBlock({
   return (
     <div
       className={cn(
-        "rounded-xl border border-white/10 bg-white/[0.02] p-4",
-        tone === "good" && "border-emerald-500/20",
-        tone === "warn" && "border-amber-500/25",
-        tone === "bad" && "border-red-500/25"
+        "w-full min-w-0 rounded-xl border border-zinc-200/90 bg-white p-4 shadow-sm",
+        tone === "good" && "border-emerald-200/90 ring-1 ring-emerald-500/10",
+        tone === "warn" && "border-amber-200/90 ring-1 ring-amber-500/10",
+        tone === "bad" && "border-red-200/90 ring-1 ring-red-500/10"
       )}
     >
-      <p className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+      <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">
         {label}
-        <span className="ml-2 text-zinc-600">({length} chars)</span>
+        <span className="ml-2 font-normal normal-case text-zinc-400">
+          ({length} chars)
+        </span>
       </p>
-      <p className="mt-2 break-words text-sm leading-relaxed text-zinc-300">
+      <p className="mt-2 break-words text-sm leading-relaxed text-zinc-700">
         {text && text.trim() ? (
           text
         ) : (
-          <span className="italic text-zinc-600">Not present in HTML</span>
+          <span className="italic text-zinc-400">Not present in HTML</span>
         )}
       </p>
     </div>
@@ -104,14 +109,14 @@ export function MetricsPanel({ metrics }: { metrics: PageMetrics }) {
 
   return (
     <div className="mb-10">
-      <h2 className="mb-4 font-mono text-sm font-medium uppercase tracking-wide text-zinc-400">
+      <BrandSectionHeading as="h2" className="mb-2">
         Factual metrics
-      </h2>
-      <p className="mb-4 text-sm text-zinc-500">
+      </BrandSectionHeading>
+      <p className="mb-3 text-sm leading-relaxed text-zinc-600">
         Extracted from the page HTML (and metadata fallbacks). Separate from
         AI-generated insights below.
       </p>
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 md:grid-cols-4">
         <Card
           label="Words"
           value={metrics.wordCount.toLocaleString()}
@@ -147,10 +152,10 @@ export function MetricsPanel({ metrics }: { metrics: PageMetrics }) {
         />
       </div>
 
-      <h3 className="mb-3 mt-8 font-mono text-xs font-medium uppercase tracking-wide text-zinc-500">
+      <BrandSectionHeading as="h3">
         Meta title &amp; description
-      </h3>
-      <div className="grid gap-3 lg:grid-cols-2">
+      </BrandSectionHeading>
+      <div className="grid gap-3 md:grid-cols-2">
         <MetaTextBlock
           label="Meta title"
           text={metrics.metaTitle}
