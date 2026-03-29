@@ -2,7 +2,7 @@ import { load } from "cheerio";
 
 import type { FirecrawlMetadata, PageMetrics } from "@/lib/types";
 
-/** Case-insensitive substring match for CTA heuristics (scope §8). */
+/** Case-insensitive substring match for CTA heuristics. */
 const CTA_PATTERN =
   /\b(get|started?|start|try|buy|book|download|sign\s*up|signup|contact|request|schedule)\b/i;
 

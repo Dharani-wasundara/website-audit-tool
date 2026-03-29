@@ -30,12 +30,12 @@ export function getMockAuditResponse(
   }
   if (metrics.metaTitleLength > 60 || metrics.metaTitleLength < 30) {
     seoIssues.push(
-      `Meta title length is ${metrics.metaTitleLength} chars (typical target ~30–60)`
+      `Meta title length is ${metrics.metaTitleLength} chars (typical target ~30-60)`
     );
   }
   if (metrics.metaDescLength > 160 || (metrics.metaDescLength > 0 && metrics.metaDescLength < 70)) {
     seoIssues.push(
-      `Meta description length is ${metrics.metaDescLength} chars (typical target ~70–160)`
+      `Meta description length is ${metrics.metaDescLength} chars (typical target ~70-160)`
     );
   }
   if (metrics.h1Count !== 1) {
@@ -54,7 +54,7 @@ export function getMockAuditResponse(
 
   const ctaIssues: string[] = [];
   if (metrics.ctaCount === 0) {
-    ctaIssues.push("ctaCount is 0 — no obvious CTAs matched keyword heuristics");
+    ctaIssues.push("ctaCount is 0: no obvious CTAs matched keyword heuristics");
   } else {
     ctaIssues.push(`ctaCount is ${metrics.ctaCount} (keyword-matched buttons/links)`);
   }
@@ -64,8 +64,8 @@ export function getMockAuditResponse(
       priority: 1,
       title: metrics.metaDescription ? "Tune meta description length" : "Add a meta description",
       reasoning: metrics.metaDescription
-        ? `metaDescLength is ${metrics.metaDescLength}; adjust toward ~140–160 characters for many SERP snippets.`
-        : "metaDescription is null — search snippets often pull missing or poor fallback text.",
+        ? `metaDescLength is ${metrics.metaDescLength}; adjust toward ~140-160 characters for many SERP snippets.`
+        : "metaDescription is null: search snippets often pull missing or poor fallback text.",
       metric_reference: metrics.metaDescription
         ? `metaDescLength=${metrics.metaDescLength}`
         : "metaDescription=null",
@@ -88,6 +88,22 @@ export function getMockAuditResponse(
       effort: "low",
       impact: "medium",
     },
+    {
+      priority: 4,
+      title: "Align heading hierarchy with content",
+      reasoning: `Heading counts H1/H2/H3 = ${metrics.h1Count}/${metrics.h2Count}/${metrics.h3Count}: ensure one clear H1 and logical sectioning for scanners and users.`,
+      metric_reference: `h1Count=${metrics.h1Count}, h2Count=${metrics.h2Count}, h3Count=${metrics.h3Count}`,
+      effort: "medium",
+      impact: "medium",
+    },
+    {
+      priority: 5,
+      title: "Calibrate body depth to intent",
+      reasoning: `wordCount=${metrics.wordCount}: thin or dense copy should match landing vs long-form intent; pair with ctaCount=${metrics.ctaCount}.`,
+      metric_reference: `wordCount=${metrics.wordCount}`,
+      effort: "low",
+      impact: "low",
+    },
   ];
 
   const insights: AuditInsights = {
@@ -100,7 +116,7 @@ export function getMockAuditResponse(
       score: clampScore(6),
       summary: `Page has ${metrics.wordCount} words after stripping (wordCount). Use this as a baseline for clarity and offer alignment.`,
       issues: [
-        `wordCount=${metrics.wordCount} — review hero and value prop density vs this length`,
+        `wordCount=${metrics.wordCount}: review hero and value prop density vs this length`,
       ],
     },
     cta: {
@@ -113,7 +129,7 @@ export function getMockAuditResponse(
       summary: `Images: totalImages=${metrics.totalImages}, imagesMissingAlt=${metrics.imagesMissingAlt}, altTextMissingPct=${metrics.altTextMissingPct.toFixed(1)}%.`,
       issues: [
         metrics.totalImages === 0
-          ? "totalImages=0 — no <img> elements in HTML"
+          ? "totalImages=0: no <img> elements in HTML"
           : `${metrics.imagesMissingAlt} of ${metrics.totalImages} images missing or empty alt (${metrics.altTextMissingPct.toFixed(1)}%)`,
       ],
     },
@@ -122,7 +138,7 @@ export function getMockAuditResponse(
       summary: `wordCount=${metrics.wordCount} with heading counts H1/H2/H3 = ${metrics.h1Count}/${metrics.h2Count}/${metrics.h3Count}.`,
       issues: [
         metrics.wordCount < 300
-          ? "wordCount under 300 — thin content for many landing pages"
+          ? "wordCount under 300: thin content for many landing pages"
           : `At ${metrics.wordCount} words, depth depends on page intent`,
       ],
     },
@@ -132,7 +148,7 @@ export function getMockAuditResponse(
   const rawModelOutput = JSON.stringify(insights, null, 2);
 
   const promptLog = {
-    systemPrompt: "[MOCK MODE — no Gemini request was sent]",
+    systemPrompt: "[MOCK MODE: no Gemini request was sent]",
     userPrompt: `[MOCK MODE]\nURL: ${url}\n\nMetrics:\n${JSON.stringify(metrics, null, 2)}`,
     rawModelOutput,
     model: "mock-local",

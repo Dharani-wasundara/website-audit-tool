@@ -79,7 +79,7 @@ export function ResultsClient() {
 
         {step === "analyzing" && metrics ? (
           <p className="mb-8 font-mono text-sm text-zinc-500">
-            Metrics above are live; waiting for Gemini…
+            Factual metrics above are final; waiting for Gemini analysis…
           </p>
         ) : null}
 

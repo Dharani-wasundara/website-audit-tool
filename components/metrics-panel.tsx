@@ -54,6 +54,41 @@ function Card({
   );
 }
 
+function MetaTextBlock({
+  label,
+  text,
+  length,
+  tone,
+}: {
+  label: string;
+  text: string | null;
+  length: number;
+  tone: "good" | "warn" | "bad";
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-xl border border-white/10 bg-white/[0.02] p-4",
+        tone === "good" && "border-emerald-500/20",
+        tone === "warn" && "border-amber-500/25",
+        tone === "bad" && "border-red-500/25"
+      )}
+    >
+      <p className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+        {label}
+        <span className="ml-2 text-zinc-600">({length} chars)</span>
+      </p>
+      <p className="mt-2 break-words text-sm leading-relaxed text-zinc-300">
+        {text && text.trim() ? (
+          text
+        ) : (
+          <span className="italic text-zinc-600">Not present in HTML</span>
+        )}
+      </p>
+    </div>
+  );
+}
+
 export function MetricsPanel({ metrics }: { metrics: PageMetrics }) {
   const altTone = toneAlt(metrics.altTextMissingPct);
   const titleTone = toneMetaTitle(metrics.metaTitleLength);
@@ -62,11 +97,20 @@ export function MetricsPanel({ metrics }: { metrics: PageMetrics }) {
     !!metrics.metaDescription
   );
 
+  const pctMissingAlt =
+    metrics.totalImages === 0
+      ? null
+      : metrics.altTextMissingPct.toFixed(1);
+
   return (
     <div className="mb-10">
       <h2 className="mb-4 font-mono text-sm font-medium uppercase tracking-wide text-zinc-400">
-        Metrics
+        Factual metrics
       </h2>
+      <p className="mb-4 text-sm text-zinc-500">
+        Extracted from the page HTML (and metadata fallbacks). Separate from
+        AI-generated insights below.
+      </p>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Card
           label="Words"
@@ -88,38 +132,36 @@ export function MetricsPanel({ metrics }: { metrics: PageMetrics }) {
           value={String(metrics.externalLinks)}
         />
         <Card
-          label="Alt text"
+          label="% images missing alt"
           value={
             metrics.totalImages === 0
-              ? "—"
-              : `${(100 - metrics.altTextMissingPct).toFixed(0)}% ok`
+              ? "-"
+              : `${pctMissingAlt}%`
           }
           sub={
             metrics.totalImages === 0
               ? "No images"
-              : `${metrics.imagesMissingAlt} missing`
+              : `${metrics.imagesMissingAlt} of ${metrics.totalImages} images · ${(100 - metrics.altTextMissingPct).toFixed(1)}% with alt`
           }
           tone={metrics.totalImages === 0 ? undefined : altTone}
         />
-        <Card
-          label="Meta"
-          value={
-            metrics.metaTitle && metrics.metaDescription
-              ? "Title + desc"
-              : metrics.metaTitle
-                ? "Title only"
-                : metrics.metaDescription
-                  ? "Desc only"
-                  : "Missing"
-          }
-          sub={`Title ${metrics.metaTitleLength} · Desc ${metrics.metaDescLength} chars`}
-          tone={
-            !metrics.metaTitle && !metrics.metaDescription
-              ? "bad"
-              : titleTone === "good" && descTone === "good"
-                ? "good"
-                : "warn"
-          }
+      </div>
+
+      <h3 className="mb-3 mt-8 font-mono text-xs font-medium uppercase tracking-wide text-zinc-500">
+        Meta title &amp; description
+      </h3>
+      <div className="grid gap-3 lg:grid-cols-2">
+        <MetaTextBlock
+          label="Meta title"
+          text={metrics.metaTitle}
+          length={metrics.metaTitleLength}
+          tone={titleTone}
+        />
+        <MetaTextBlock
+          label="Meta description"
+          text={metrics.metaDescription}
+          length={metrics.metaDescLength}
+          tone={descTone}
         />
       </div>
     </div>

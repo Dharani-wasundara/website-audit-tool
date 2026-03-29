@@ -15,7 +15,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "WebAudit — Website analysis",
+  title: "WebAudit | Website analysis",
   description:
     "AI-powered single-page website analysis with deterministic metrics and grounded insights.",
 };
