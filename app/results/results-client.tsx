@@ -4,11 +4,19 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { AuditProgress } from "@/components/audit-progress";
+import { InsightsPanel } from "@/components/insights-panel";
+import { MetricsPanel } from "@/components/metrics-panel";
+import { PromptLogDrawer } from "@/components/prompt-log-drawer";
+import { RecommendationsList } from "@/components/recommendations-list";
 import { WEBAUDIT_URL_STORAGE_KEY } from "@/components/url-input";
+import { Button } from "@/components/ui/button";
+import { useAudit } from "@/hooks/use-audit";
 
 export function ResultsClient() {
   const router = useRouter();
   const [url, setUrl] = useState<string | null>(null);
+  const { step, error, metrics, audit, retry } = useAudit(url);
 
   useEffect(() => {
     const stored =
@@ -32,7 +40,7 @@ export function ResultsClient() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] px-6 py-12">
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-4xl">
         <Link
           href="/"
           className="mb-8 inline-block font-mono text-sm text-[#00d4ff] hover:underline"
@@ -43,10 +51,38 @@ export function ResultsClient() {
         <p className="mb-6 break-all font-mono text-sm text-zinc-500">
           {url}
         </p>
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6 text-sm text-zinc-400">
-          Full metrics grid and Gemini insights will run here next (scrape →
-          extract → audit pipeline).
-        </div>
+
+        <AuditProgress url={url} step={step} />
+
+        {error ? (
+          <div className="mb-8 rounded-xl border border-red-500/30 bg-red-500/5 p-4">
+            <p className="text-sm text-red-300">{error}</p>
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-3 border-white/20 text-zinc-200"
+              onClick={retry}
+            >
+              Retry
+            </Button>
+          </div>
+        ) : null}
+
+        {metrics ? <MetricsPanel metrics={metrics} /> : null}
+
+        {step === "analyzing" && metrics ? (
+          <p className="mb-8 font-mono text-sm text-zinc-500">
+            Metrics above are live; waiting for Gemini…
+          </p>
+        ) : null}
+
+        {audit ? (
+          <>
+            <InsightsPanel insights={audit.insights} />
+            <RecommendationsList items={audit.insights.recommendations} />
+            <PromptLogDrawer log={audit.promptLog} />
+          </>
+        ) : null}
       </div>
     </div>
   );
