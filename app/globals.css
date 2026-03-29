@@ -3,6 +3,26 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  /**
+   * Chrome / Edge: picking a URL from autofill applies -webkit-autofill (blue/yellow tint).
+   * Reset to match the white field (inset shadow trick); long transition prevents flash.
+   */
+  .audit-url-input:-webkit-autofill,
+  .audit-url-input:-webkit-autofill:hover,
+  .audit-url-input:-webkit-autofill:focus,
+  .audit-url-input:-webkit-autofill:active {
+    -webkit-text-fill-color: #18181b;
+    box-shadow: inset 0 0 0 1000px #ffffff;
+    transition: background-color 99999s ease-out 0s;
+  }
+
+  .audit-url-input:autofill {
+    box-shadow: inset 0 0 0 1000px #ffffff;
+    color: #18181b;
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

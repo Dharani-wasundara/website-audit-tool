@@ -74,7 +74,7 @@ export function UrlInputForm({ className }: { className?: string }) {
             placeholder="https://example.com"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            className="min-w-0 flex-1 bg-transparent py-2 text-[15px] leading-normal text-zinc-900 placeholder:text-zinc-400 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 sm:py-1.5 [caret-color:var(--primary)]"
+            className="audit-url-input min-w-0 flex-1 bg-transparent py-2 text-[15px] leading-normal text-zinc-900 placeholder:text-zinc-400 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 sm:py-1.5 [caret-color:var(--primary)]"
           />
         </div>
         <Button

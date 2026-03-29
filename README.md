@@ -2,15 +2,17 @@
 
 AI-assisted **single-page** audit for marketing sites: factual metrics extracted from HTML, then **Gemini** produces structured insights and prioritized recommendations. Scope: **one URL per run**, no multi-page crawling.
 
-**Assignment / grader checklist:** [SUBMISSION.md](./SUBMISSION.md) (repo link, deployed URL, prompt logs).
+## Submission deliverables (assignment)
 
-## Live demo
+| Item | Where |
+|------|--------|
+| **Source repository** | [github.com/Dharani-wasundara/website-audit-tool](https://github.com/Dharani-wasundara/website-audit-tool) *(update if you submit from a different fork)* |
+| **Runnable app** | [Setup](#setup) below (`npm install`, `.env.local`, `npm run dev`) |
+| **Live deployment** | **[https://website-audit-tool-omega.vercel.app/](https://website-audit-tool-omega.vercel.app/)** (Vercel) |
+| **Prompt logs / traces** | Static reference: [prompt-log.txt](./prompt-log.txt). Runtime logs (system prompt, user prompt, raw output, tokens) are on the results page and in exported JSON. |
+| **README** | This file: architecture, AI decisions, trade-offs, follow-up ideas. |
 
-Add your deployed URL here after publishing (e.g. Vercel):
-
-- **Production:** `https://YOUR_DEPLOYMENT.vercel.app` *(replace when deployed)*
-
-Local: [http://localhost:3000](http://localhost:3000)
+**Local development:** [http://localhost:3000](http://localhost:3000)
 
 ## Setup
 
@@ -18,10 +20,20 @@ Local: [http://localhost:3000](http://localhost:3000)
 
 ```bash
 npm install
-cp .env.example .env.local   # if you add an example file; otherwise create .env.local manually
 ```
 
-Create **`.env.local`** in the project root:
+Create a file named **`.env.local`** in the project root (it is gitignored). Add your API keys using this shape:
+
+```env
+FIRECRAWL_API_KEY=
+GEMINI_API_KEY=
+
+# Optional — defaults to gemini-2.5-flash if omitted
+# GEMINI_MODEL=gemini-2.5-flash
+
+# Optional — set to true to skip Gemini and use mock insights (still uses real metrics)
+# MOCK_AUDIT=false
+```
 
 | Variable | Required | Description |
 |----------|----------|-------------|
@@ -31,6 +43,8 @@ Create **`.env.local`** in the project root:
 | `MOCK_AUDIT` | No | Set to `true` to skip Gemini and use deterministic mock insights (uses real metrics). |
 
 \*If `GEMINI_API_KEY` is unset, the app uses **mock audit** mode so the UI still works for demos.
+
+For the **production** app ([website-audit-tool-omega.vercel.app](https://website-audit-tool-omega.vercel.app/)), add the same keys in your Vercel project under **Settings → Environment Variables**. Never commit `.env.local` or API keys to git.
 
 ```bash
 npm run dev
@@ -88,7 +102,7 @@ flowchart LR
 
 ## Prompt logs (deliverable)
 
-The results page includes a **Prompt log** drawer with:
+See [prompt-log.txt](./prompt-log.txt) for a static copy of the system and user prompt templates. The results page includes a **Prompt log** drawer with:
 
 - System prompt  
 - User prompt (metrics JSON + markdown)  

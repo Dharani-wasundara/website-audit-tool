@@ -37,7 +37,7 @@ export function ResultsClient() {
     }
   }, [raw, url, router]);
 
-  const { step, error, scrape, metrics, audit, retry } = useAudit(url);
+  const { step, error, scrape, metrics, audit, runId, retry } = useAudit(url);
 
   if (raw === null || url === null) {
     return (
@@ -89,7 +89,7 @@ export function ResultsClient() {
           </div>
         </header>
 
-        <AuditProgress url={url} step={step} />
+        <AuditProgress key={`${url}-${runId}`} url={url} step={step} />
 
         {error ? (
           <div className="mb-8 rounded-xl border border-red-200 bg-red-50/80 p-4">

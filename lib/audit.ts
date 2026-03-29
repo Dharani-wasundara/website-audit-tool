@@ -25,8 +25,16 @@ function isInsightSection(x: unknown): x is {
 } {
   if (!x || typeof x !== "object") return false;
   const o = x as Record<string, unknown>;
+  const score = o.score;
+  if (
+    typeof score !== "number" ||
+    !Number.isFinite(score) ||
+    score < 1 ||
+    score > 10
+  ) {
+    return false;
+  }
   return (
-    typeof o.score === "number" &&
     typeof o.summary === "string" &&
     Array.isArray(o.issues) &&
     o.issues.every((i) => typeof i === "string")
@@ -38,8 +46,16 @@ function isRecommendation(x: unknown): x is AuditInsights["recommendations"][num
   const o = x as Record<string, unknown>;
   const effort = o.effort;
   const impact = o.impact;
+  const pr = o.priority;
+  if (
+    typeof pr !== "number" ||
+    !Number.isInteger(pr) ||
+    pr < 1 ||
+    pr > 5
+  ) {
+    return false;
+  }
   return (
-    typeof o.priority === "number" &&
     typeof o.title === "string" &&
     typeof o.reasoning === "string" &&
     typeof o.metric_reference === "string" &&

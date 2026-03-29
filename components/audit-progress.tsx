@@ -1,6 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import type { AuditStep } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -19,22 +20,28 @@ const STEPS: {
   },
 ];
 
-function stepIndex(step: AuditStep): number {
-  if (step === "idle") return -1;
-  if (step === "complete") return 3;
-  if (step === "error") return -1;
+/** Index of the active pipeline step, or `STEPS.length` when all are done. */
+function runningIndex(step: AuditStep): number {
+  if (step === "idle" || step === "error") return -1;
+  if (step === "complete") return STEPS.length;
   return STEPS.findIndex((s) => s.key === step);
 }
 
-function progressPercent(idx: number): number {
+/** Mid-segment progress so the last step is not shown as 100% until finished. */
+function displayPercent(step: AuditStep, idx: number): number {
+  if (step === "complete") return 100;
   if (idx < 0) return 0;
-  return Math.min(100, Math.round(((idx + 1) / STEPS.length) * 100));
+  return Math.min(
+    99,
+    Math.round(((idx + 0.5) / STEPS.length) * 100)
+  );
 }
 
-function connectorEndPercent(idx: number, n: number): number {
+/** Connector fill: stops at the middle of the current segment until complete. */
+function connectorFillPercent(step: AuditStep, idx: number, n: number): number {
+  if (step === "complete") return 100;
   if (idx < 0) return 0;
-  if (idx === n - 1) return 100;
-  return ((idx + 0.5) / n) * 100;
+  return Math.min(100, ((idx + 0.5) / n) * 100);
 }
 
 /** Thin white ring so the track reads cleanly behind nodes */
@@ -61,7 +68,7 @@ function StepMarker({ done, active }: { done: boolean; active: boolean }) {
           nodeRing
         )}
       >
-        <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+        <span className="h-1.5 w-1.5 rounded-full bg-primary animate-audit-dot-breathe" />
       </span>
     );
   }
@@ -77,6 +84,8 @@ function StepMarker({ done, active }: { done: boolean; active: boolean }) {
   );
 }
 
+const HOLD_MS = 520;
+
 export function AuditProgress({
   url,
   step,
@@ -84,95 +93,151 @@ export function AuditProgress({
   url: string;
   step: AuditStep;
 }) {
-  const idx = stepIndex(step);
-  const show = step !== "complete" && step !== "error" && step !== "idle";
+  const [exiting, setExiting] = useState(false);
+  const [removed, setRemoved] = useState(false);
 
-  if (!show && step !== "error") {
+  const idx = runningIndex(step);
+  const showCard =
+    step !== "idle" &&
+    step !== "complete" &&
+    step !== "error" &&
+    !removed;
+
+  const showCompleteCard = step === "complete" && !removed;
+
+  /* New pipeline run remounts this component (parent key); no sync setState on step here. */
+
+  useEffect(() => {
+    if (step !== "complete") return;
+    const hold = setTimeout(() => setExiting(true), HOLD_MS);
+    return () => clearTimeout(hold);
+  }, [step]);
+
+  useEffect(() => {
+    if (!exiting) return;
+    const fallback = setTimeout(() => setRemoved(true), 1000);
+    return () => clearTimeout(fallback);
+  }, [exiting]);
+
+  if (step === "idle" || removed) {
     return null;
   }
 
-  const pct = progressPercent(idx);
+  const pct = displayPercent(step, idx);
+  const linePct = connectorFillPercent(step, idx, STEPS.length);
   const currentLabel =
-    idx >= 0 && idx < STEPS.length ? STEPS[idx].label : null;
-  const linePct = connectorEndPercent(idx, STEPS.length);
+    step === "complete"
+      ? "Audit complete"
+      : idx >= 0 && idx < STEPS.length
+        ? STEPS[idx].label
+        : null;
+
+  if (step === "error") {
+    return (
+      <div className="mb-8 rounded-lg border border-zinc-200/90 bg-white p-3.5 sm:p-4">
+        <p className="mb-4 text-[10px] font-medium uppercase tracking-wide text-zinc-500">
+          Auditing{" "}
+          <span className="font-normal normal-case text-primary break-all">
+            {url}
+          </span>
+        </p>
+        <p className="text-sm text-red-700">Pipeline stopped due to an error.</p>
+      </div>
+    );
+  }
+
+  if (!showCard && !showCompleteCard) {
+    return null;
+  }
 
   return (
-    <div className="mb-8 rounded-lg border border-zinc-200/90 bg-white p-3.5 sm:p-4">
+    <div
+      className={cn(
+        "overflow-hidden rounded-lg border border-zinc-200/90 bg-white p-3.5 transition-[opacity,transform,margin-bottom] duration-500 ease-out motion-reduce:duration-200 sm:p-4",
+        exiting
+          ? "pointer-events-none mb-0 opacity-0 -translate-y-2 scale-[0.99]"
+          : "mb-8 opacity-100 translate-y-0 scale-100"
+      )}
+      onTransitionEnd={(e) => {
+        if (e.target !== e.currentTarget) return;
+        if (e.propertyName !== "opacity" || !exiting) return;
+        setRemoved(true);
+      }}
+    >
       <p className="mb-4 text-[10px] font-medium uppercase tracking-wide text-zinc-500">
         Auditing{" "}
         <span className="font-normal normal-case text-primary break-all">
           {url}
         </span>
       </p>
-      {step === "error" ? (
-        <p className="text-sm text-red-700">Pipeline stopped due to an error.</p>
-      ) : (
-        <div
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={pct}
-          aria-label={
-            currentLabel
-              ? `Audit progress: ${pct} percent, ${currentLabel}`
-              : "Audit progress"
-          }
-        >
-          <div className="mb-4 grid grid-cols-3 gap-0.5">
+      <div
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={pct}
+        aria-label={
+          currentLabel
+            ? `Audit progress: ${pct} percent, ${currentLabel}`
+            : "Audit progress"
+        }
+      >
+        <div className="mb-4 grid grid-cols-3 gap-0.5">
+          {STEPS.map((s, i) => {
+            const done = idx > i;
+            const active = idx === i;
+            const pending = idx < i;
+            return (
+              <div
+                key={s.key}
+                className="flex justify-center px-0.5 text-center"
+              >
+                <span
+                  className={cn(
+                    "text-[10px] leading-tight sm:text-[11px]",
+                    pending && "text-zinc-400",
+                    (done || active) && "font-medium text-zinc-900"
+                  )}
+                >
+                  {s.shortLabel}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="relative min-h-8">
+          <div
+            className="pointer-events-none absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-zinc-200"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute left-0 top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-primary transition-[width] duration-300 ease-out motion-reduce:transition-none"
+            style={{ width: `${linePct}%` }}
+            aria-hidden
+          />
+          <ol className="relative z-10 grid grid-cols-3 list-none">
             {STEPS.map((s, i) => {
               const done = idx > i;
               const active = idx === i;
-              const pending = idx < i;
               return (
-                <div key={s.key} className="flex justify-center px-0.5 text-center">
-                  <span
-                    className={cn(
-                      "text-[10px] leading-tight sm:text-[11px]",
-                      pending && "text-zinc-400",
-                      (done || active) && "font-medium text-zinc-900"
-                    )}
-                  >
-                    {s.shortLabel}
-                  </span>
-                </div>
+                <li
+                  key={s.key}
+                  className="flex justify-center"
+                  aria-current={active ? "step" : undefined}
+                >
+                  <StepMarker done={done} active={active} />
+                </li>
               );
             })}
-          </div>
-
-          <div className="relative min-h-8">
-            <div
-              className="pointer-events-none absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-zinc-200"
-              aria-hidden
-            />
-            <div
-              className="pointer-events-none absolute left-0 top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-primary transition-[width] duration-300 ease-out motion-reduce:transition-none"
-              style={{ width: `${linePct}%` }}
-              aria-hidden
-            />
-            <ol className="relative z-10 grid grid-cols-3 list-none">
-              {STEPS.map((s, i) => {
-                const done = idx > i;
-                const active = idx === i;
-                return (
-                  <li
-                    key={s.key}
-                    className="flex justify-center"
-                    aria-current={active ? "step" : undefined}
-                  >
-                    <StepMarker done={done} active={active} />
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
-
-          <p className="mt-4 text-center text-xs text-zinc-600">
-            {currentLabel ?? "Starting…"}
-            <span className="text-zinc-300"> · </span>
-            <span className="tabular-nums text-primary">{pct}%</span>
-          </p>
+          </ol>
         </div>
-      )}
+
+        <p className="mt-4 text-center text-xs text-zinc-600">
+          {currentLabel ?? "Starting…"}
+          <span className="text-zinc-300"> · </span>
+          <span className="tabular-nums text-primary">{pct}%</span>
+        </p>
+      </div>
     </div>
   );
 }

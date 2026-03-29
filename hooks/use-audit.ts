@@ -9,12 +9,42 @@ import type {
   ScrapeResponse,
 } from "@/lib/types";
 
+/** Avoid `response.json()` when the platform returns HTML/plain text (e.g. Vercel 5xx pages). */
+async function readJsonBody(res: Response): Promise<unknown> {
+  const text = await res.text();
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    const snippet = text.replace(/\s+/g, " ").slice(0, 200);
+    throw new Error(
+      res.ok
+        ? `Invalid response from server: ${snippet}`
+        : `Request failed (${res.status}): ${snippet}`
+    );
+  }
+}
+
+function jsonErrorMessage(data: unknown, fallback: string): string {
+  if (
+    data &&
+    typeof data === "object" &&
+    "error" in data &&
+    typeof (data as { error: unknown }).error === "string"
+  ) {
+    return (data as { error: string }).error;
+  }
+  return fallback;
+}
+
 type UseAuditState = {
   step: AuditStep;
   error: string | null;
   scrape: ScrapeResponse | null;
   metrics: PageMetrics | null;
   audit: AuditResponse | null;
+  /** Increments on retry; use as React `key` to reset child UI for a new run. */
+  runId: number;
   retry: () => void;
 };
 
@@ -48,7 +78,8 @@ export function useAudit(url: string | null): UseAuditState {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ url }),
         });
-        const d1 = (await r1.json()) as { error?: string } & Partial<ScrapeResponse>;
+        const d1 = (await readJsonBody(r1)) as { error?: string } &
+          Partial<ScrapeResponse>;
         if (!r1.ok) {
           throw new Error(d1.error ?? "Scrape failed");
         }
@@ -75,11 +106,9 @@ export function useAudit(url: string | null): UseAuditState {
             metadata: scraped.metadata,
           }),
         });
-        const d2 = await r2.json();
+        const d2 = await readJsonBody(r2);
         if (!r2.ok) {
-          throw new Error(
-            typeof d2.error === "string" ? d2.error : "Extract failed"
-          );
+          throw new Error(jsonErrorMessage(d2, "Extract failed"));
         }
         if (cancelled) return;
         setMetrics(d2 as PageMetrics);
@@ -94,11 +123,9 @@ export function useAudit(url: string | null): UseAuditState {
             url,
           }),
         });
-        const d3 = await r3.json();
+        const d3 = await readJsonBody(r3);
         if (!r3.ok) {
-          throw new Error(
-            typeof d3.error === "string" ? d3.error : "Audit failed"
-          );
+          throw new Error(jsonErrorMessage(d3, "Audit failed"));
         }
         if (cancelled) return;
         setAudit(d3 as AuditResponse);
@@ -117,5 +144,5 @@ export function useAudit(url: string | null): UseAuditState {
     };
   }, [url, retryKey]);
 
-  return { step, error, scrape, metrics, audit, retry };
+  return { step, error, scrape, metrics, audit, runId: retryKey, retry };
 }
