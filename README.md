@@ -2,6 +2,8 @@
 
 AI-assisted **single-page** audit for marketing sites: factual metrics extracted from HTML, then **Gemini** produces structured insights and prioritized recommendations. Scope: **one URL per run**, no multi-page crawling.
 
+**Assignment / grader checklist:** [SUBMISSION.md](./SUBMISSION.md) (repo link, deployed URL, prompt logs).
+
 ## Live demo
 
 Add your deployed URL here after publishing (e.g. Vercel):
